@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Translate medical reports into Indian languages and understand the next steps.">
+  <meta name="theme-color" content="#087f72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="MediSaarthi">
+  <title>MediSaarthi | Medical Report Translator</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;family=Noto+Sans+Bengali:wght@400;600&amp;family=Noto+Sans+Devanagari:wght@400;600&amp;family=Noto+Sans+Malayalam:wght@400;600&amp;family=Noto+Sans+Tamil:wght@400;600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="MediSaarthi home">
+      <span class="brand-mark"><i data-lucide="heart-pulse"></i></span>
+      <span>MediSaarthi</span>
+    </a>
+    <div class="privacy-note"><i data-lucide="shield-check"></i> Reports stay on this device <button class="install-button" id="install-app" type="button" hidden><i data-lucide="download"></i> Install app</button></div>
+  </header>
+
+  <main>
+    <section class="workspace" aria-labelledby="page-title">
+      <div class="intro">
+        <p class="eyebrow">Report translator</p>
+        <h1 id="page-title">Understand your medical report, in your language.</h1>
+        <p>Upload a report to translate key findings and get clear, careful next steps.</p>
+      </div>
+
+      <div class="stepper" aria-label="Progress">
+        <div class="step active" data-step="1"><span>1</span> Upload</div>
+        <div class="step" data-step="2"><span>2</span> Review</div>
+        <div class="step" data-step="3"><span>3</span> Understand</div>
+      </div>
+
+      <section id="upload-view" class="view active" aria-labelledby="upload-title">
+        <div class="upload-layout">
+          <div>
+            <h2 id="upload-title">Add a medical report</h2>
+            <p class="section-copy">PDF, JPG, PNG or a text file, up to 10 MB.</p>
+            <label class="drop-zone" id="drop-zone" for="report-file">
+              <input id="report-file" type="file" accept=".pdf,.jpg,.jpeg,.png,.txt,text/plain,application/pdf,image/*">
+              <span class="upload-icon"><i data-lucide="scan-line"></i></span>
+              <strong>Drop your report here</strong>
+              <span>or choose a file from your device</span>
+              <span class="choose-button"><i data-lucide="upload"></i> Choose report</span>
+            </label>
+            <div class="divider"><span>or</span></div>
+            <button class="text-report-button" id="paste-report" type="button">
+              <i data-lucide="clipboard-paste"></i>
+              <span><strong>Paste report text</strong><small>Useful when you already have a digital copy</small></span>
+              <i data-lucide="chevron-right"></i>
+            </button>
+            <button class="demo-link" id="try-demo" type="button"><i data-lucide="sparkles"></i> Try with a sample blood report</button>
+          </div>
+
+          <aside class="trust-panel" aria-label="Privacy and safety information">
+            <div class="trust-illustration" aria-hidden="true">
+              <div class="report-sheet"><span></span><span></span><span></span><i data-lucide="activity"></i></div>
+              <div class="shield"><i data-lucide="shield-check"></i></div>
+            </div>
+            <h3>Your health data stays private</h3>
+            <p>Reports are read in your browser and are not saved to a server.</p>
+            <ul>
+              <li><i data-lucide="check"></i> No account needed</li>
+              <li><i data-lucide="check"></i> No report history stored</li>
+              <li><i data-lucide="check"></i> You control what is shared</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <section id="review-view" class="view" aria-labelledby="review-title">
+        <div class="review-heading">
+          <button class="icon-button" id="back-to-upload" type="button" aria-label="Back to upload"><i data-lucide="arrow-left"></i></button>
+          <div><p class="eyebrow">Step 2 of 3</p><h2 id="review-title">Check the extracted report</h2></div>
+        </div>
+        <div class="notice info"><i data-lucide="scan-text"></i><span>Check names, values and ranges before translating. Scanned reports may contain reading errors.</span></div>
+        <label class="field-label" for="report-text">Report text</label>
+        <textarea id="report-text" rows="14" spellcheck="false" placeholder="Paste the English text from your report here..."></textarea>
+        <div class="review-actions">
+          <div id="file-status" class="file-status"></div>
+          <button class="primary-button" id="continue-button" type="button">Continue <i data-lucide="arrow-right"></i></button>
+        </div>
+      </section>
+
+      <section id="results-view" class="view" aria-labelledby="results-title">
+        <div class="results-topline">
+          <div><p class="eyebrow">Your report guide</p><h2 id="results-title">Report explained</h2></div>
+          <button class="secondary-button" id="new-report" type="button"><i data-lucide="plus"></i> New report</button>
+        </div>
+        <div class="language-tabs" id="language-tabs" role="tablist" aria-label="Translation language"></div>
+        <div class="results-grid">
+          <div class="results-main">
+            <div id="urgent-alert"></div>
+            <section class="validation-panel" aria-labelledby="validation-title">
+              <div class="section-title"><i data-lucide="badge-check"></i><h3 id="validation-title">Automated report check</h3></div>
+              <div id="validation-summary"></div>
+            </section>
+            <section class="result-section" aria-labelledby="summary-title">
+              <div class="section-title"><i data-lucide="languages"></i><h3 id="summary-title">Translated summary</h3></div>
+              <div id="translated-summary" class="translated-summary"></div>
+            </section>
+            <section class="result-section" aria-labelledby="findings-title">
+              <div class="section-title"><i data-lucide="list-checks"></i><h3 id="findings-title">Key findings</h3></div>
+              <div id="findings-list" class="findings-list"></div>
+            </section>
+            <section class="result-section" aria-labelledby="precautions-title">
+              <div class="section-title"><i data-lucide="heart-handshake"></i><h3 id="precautions-title">General precautions</h3></div>
+              <ul id="precautions-list" class="precautions-list"></ul>
+            </section>
+          </div>
+          <aside class="doctor-panel">
+            <div class="section-title"><i data-lucide="map-pin"></i><h3>Doctors near you</h3></div>
+            <p>Find healthcare facilities listed around your locality.</p>
+            <label class="field-label" for="locality">City or PIN code</label>
+            <div class="location-input"><i data-lucide="search"></i><input id="locality" type="search" placeholder="e.g. Kolkata 700001"><button id="find-doctors" type="button" aria-label="Search nearby doctors"><i data-lucide="arrow-right"></i></button></div>
+            <button class="location-button" id="use-location" type="button"><i data-lucide="locate-fixed"></i> Use my current location</button>
+            <div id="doctor-results" class="doctor-results" aria-live="polite"></div>
+            <div class="locator-divider"></div>
+            <div class="section-title pharmacy-title"><i data-lucide="pill"></i><h3>Find a pharmacy</h3></div>
+            <p>Find nearby pharmacies for a medicine. Call ahead to confirm stock and prescription requirements.</p>
+            <label class="field-label" for="medicine">Medicine name <span>(optional)</span></label>
+            <div class="location-input"><i data-lucide="search"></i><input id="medicine" type="search" placeholder="e.g. paracetamol"><button id="find-pharmacies" type="button" aria-label="Find nearby pharmacies"><i data-lucide="arrow-right"></i></button></div>
+            <div id="pharmacy-results" class="doctor-results" aria-live="polite"></div>
+          </aside>
+        </div>
+        <div class="medical-disclaimer"><i data-lucide="circle-alert"></i><p><strong>This is not a diagnosis.</strong> Translations and precautions can contain errors and do not replace advice from a qualified doctor. Do not change medicines based on this guide.</p></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="paste-dialog">
+    <form method="dialog">
+      <div class="dialog-heading"><h2>Paste report text</h2><button class="icon-button" value="cancel" aria-label="Close"><i data-lucide="x"></i></button></div>
+      <p>Remove your name, address or report ID first if you prefer.</p>
+      <textarea id="paste-text" rows="12" placeholder="Paste the English report text..."></textarea>
+      <div class="dialog-actions"><button class="secondary-button" value="cancel">Cancel</button><button class="primary-button" id="use-pasted-text" value="default">Use this text</button></div>
+    </form>
+  </dialog>
+
+  <div id="processing" class="processing" hidden aria-live="polite">
+    <div class="spinner"></div><strong id="processing-title">Reading your report...</strong><span id="processing-detail">This happens only on your device.</span>
+  </div>
+</body>
+</html>

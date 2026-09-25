@@ -1,0 +1,18 @@
+{
+  "name": "MediSaarthi Medical Report Translator",
+  "short_name": "MediSaarthi",
+  "description": "Translate medical reports into Indian languages on the device.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f7faf7",
+  "theme_color": "#087f72",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
