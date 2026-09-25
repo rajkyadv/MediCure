@@ -1,0 +1,8 @@
+{
+  "appId": "com.medisaarthi.app",
+  "appName": "MediSaarthi",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https"
+  }
+}
